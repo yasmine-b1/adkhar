@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "./App.css";
 import { Routes, Route, Link } from "react-router-dom";
 import AdhkarDetail from "./AdhkarDetail";
@@ -48,27 +48,28 @@ function App() {
   };
 
   // On calcule le progrès pour chaque catégorie
-  const categories = [
-    { id: "1", title: "Wake up Adkar", key: "wakeup", icon: WakeUpIcon, color: "#FFB347" },
-    { id: "2", title: "Morning Adkar", key: "morning", icon: MorningIcon, color: "#FFD93D" },
-    { id: "3", title: "Evening Adkar", key: "evening", icon: EveningIcon, color: "#A29BFE" },
-    { id: "4", title: "Sleep Adkar", key: "sleep", icon: SleepIcon, color: "#74B9FF" },
-    { id: "5", title: "After Prayers Adkar", key: "after_prayer", icon: AdhkarIcon, color: "#55E6C1" },
-  ].map(cat => {
-    // Récupérer la sauvegarde spécifique à cette catégorie
-    const saved = JSON.parse(localStorage.getItem(`progress-${cat.id}`) || "{}");
-    const data = adhkarData[cat.key] || { quran: [], hadith: [] };
+  const categories = useMemo(() => {
+    const cats = [
+      { id: "1", title: "Wake up Adkar", key: "wakeup", icon: WakeUpIcon, color: "#FFB347" },
+      { id: "2", title: "Morning Adkar", key: "morning", icon: MorningIcon, color: "#FFD93D" },
+      { id: "3", title: "Evening Adkar", key: "evening", icon: EveningIcon, color: "#A29BFE" },
+      { id: "4", title: "Sleep Adkar", key: "sleep", icon: SleepIcon, color: "#74B9FF" },
+      { id: "5", title: "After Prayers Adkar", key: "after_prayer", icon: AdhkarIcon, color: "#55E6C1" },
+    ];
 
-    // On combine Quran et Hadith pour le total
-    const allItems = [...data.quran, ...data.hadith];
-    const total = allItems.length;
+    return cats.map(cat => {
+      const saved = JSON.parse(localStorage.getItem(`progress-${cat.id}`) || "{}");
+      const data = adhkarData[cat.key] || { quran: [], hadith: [] };
+      const allItems = [...data.quran, ...data.hadith];
 
-    // On compte combien sont terminés (count atteint)
-    const completed = allItems.filter(item => (saved[item.id] || 0) >= item.count).length;
+      const completed = allItems.filter(item => (saved[item.id] || 0) >= item.count).length;
+      const total = allItems.length;
+      const percent = total > 0 ? (completed / total) * 100 : 0;
 
-    return { ...cat, total, completed };
-  });
-
+      return { ...cat, total, completed, percent };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refresh]);
   return (
     <div className="app-container">
       <Routes>

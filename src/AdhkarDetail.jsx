@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adhkarData } from "./AdhkarData.js";
 import NotifIcon from "./assets/images/Notif.svg";
@@ -27,6 +27,9 @@ const AdhkarDetail = ({ setRefresh }) => {
         const saved = localStorage.getItem(`progress-${id}`);
         return saved ? JSON.parse(saved) : {};
     });
+    useEffect(() => {
+        localStorage.setItem(`progress-${id}`, JSON.stringify(userCounts));
+    }, [userCounts, id]);
 
     // incrémenter compteur
     const handleIncrement = (itemId, maxCount) => {
